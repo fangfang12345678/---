@@ -1,6 +1,7 @@
 <template>
   <div class="loginContent">
     <div class="leftpage">
+    <div>修改了一下</div>
       <img
         src="http://www-wms-java.itheima.net/img/title.ef005a7a.png"
         alt=""
