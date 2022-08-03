@@ -30,10 +30,7 @@
           <el-checkbox v-model="checked" class="redio">记住密码</el-checkbox>
         </template>
         <el-form-item>
-          <el-button
-            type="primary"
-            @click="submitForm('ruleForm')"
-            class="button"
+          <el-button type="primary" @click="submitForm" class="button"
             >立即登录</el-button
           >
         </el-form-item>
@@ -71,6 +68,10 @@ export default {
   methods: {
     onSubmit(values) {
       console.log("submit", values);
+    },
+    async submitForm() {
+      await this.$refs.ruleForm.validate();
+      this.$router.push("/workbench");
     },
   },
 };

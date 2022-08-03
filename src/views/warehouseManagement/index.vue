@@ -1,29 +1,31 @@
 <template>
   <div id="warehouseManagement">
     <el-card class="box-card">
-      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+      <el-form :inline="true" :model="page" class="demo-form-inline">
         <el-form-item>
+          <div>仓库名称</div>
+          <el-input
+            v-model="page.warehouseName"
+            placeholder="请输入"
+          ></el-input>
+        </el-form-item>
+        <el-form-item class="demo-form-inline">
           <div>库区名称</div>
 
-          <el-input v-model="formInline.user" placeholder="请输入"></el-input>
+          <el-input v-model="page.name" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item class="demo-form-inline">
-          <div>库位名称</div>
+          <div>仓库状态</div>
 
-          <el-input v-model="formInline.user" placeholder="请输入"></el-input>
-        </el-form-item>
-        <el-form-item class="demo-form-inline">
-          <div>库位状态</div>
-
-          <el-select v-model="formInline.region" placeholder="请选择">
-            <el-option label="全部" value="shanngga"></el-option>
-            <el-option label="停用" value="sanngga"></el-option>
-            <el-option label="启用" value="shnngga"></el-option>
+          <el-select v-model="page.status" placeholder="请选择">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="停用" value="0"></el-option>
+            <el-option label="启用" value="1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="onSubmit">查询</el-button>
-          <el-button type="info">重置</el-button>
+          <el-button type="info" @click="close">重置</el-button>
         </el-form-item>
       </el-form></el-card
     >
@@ -42,27 +44,37 @@
         style="width: 100%"
         :row-class-name="tableRowClassName"
       >
-        <el-table-column fixed type="index" label="序号" width="150">
+        <el-table-column fixed type="index" label="序号" width="120">
         </el-table-column>
         <el-table-column prop="code" label="仓库编码" width="120">
         </el-table-column>
         <el-table-column prop="name" label="仓库名称" width="120">
         </el-table-column>
-        <el-table-column prop="type" label="仓库类型" width="120">
+        <el-table-column
+          prop="type"
+          :formatter="formatEmployment"
+          label="仓库类型"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="location" label="省/市/区" width="300">
+        <el-table-column prop="location" label="省/市/区" width="120">
         </el-table-column>
         <el-table-column prop="address" label="详细地址" width="120">
         </el-table-column>
-        <el-table-column prop="status" label="仓库状态" width="120">
+        <el-table-column
+          prop="status"
+          label="仓库状态"
+          :formatter="formatEmploymentTwo"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="surface" label="仓库面积m²" width="300">
+        <el-table-column prop="surface" label="仓库面积m²" width="120">
         </el-table-column>
         <el-table-column prop="includedNum" label="库区数量" width="120">
         </el-table-column>
         <el-table-column prop="createName" label="负责人" width="120">
         </el-table-column>
-        <el-table-column prop="phone" label="联系电话" width="300">
+        <el-table-column prop="phone" label="联系电话" width="120">
         </el-table-column>
         <el-table-column prop="updateTime" label="更新时间" width="120">
         </el-table-column>
@@ -71,9 +83,7 @@
             <el-button @click="handleClick(row.id)" type="text" size="small"
               >编辑</el-button
             >
-            <el-button @click="handleClick(row.id)" type="text" size="small"
-              >停用</el-button
-            >
+            <el-button type="text" size="small">停用</el-button>
             <el-button type="text" size="small">删除</el-button>
           </template>
         </el-table-column>
@@ -84,11 +94,11 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="page.current"
         :page-sizes="[10, 20, 30, 40]"
         :page-size="page.size"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="20"
+        :total="+total"
       >
       </el-pagination>
     </div>
@@ -96,16 +106,15 @@
 </template>
 
 <script>
-import { getWareHousePage } from "@/api/warehouseManagement";
+import { getWareHousePage, getWaresit } from "@/api/warehouseManagement";
 export default {
   name: "warehouseManagement",
   data() {
     return {
-      currentPage1: 5,
-      currentPage2: 5,
-      currentPage3: 5,
-      currentPage4: 4,
       page: {
+        warehouseName: "",
+        name: "",
+        status: "",
         like_code: "",
         like_name: "",
         current: 1,
@@ -114,20 +123,28 @@ export default {
       },
       total: 10,
       tableData: [],
-
-      // value: "",
-      radio: "1",
-
-      formInline: {
-        user: "",
-        region: "",
-      },
     };
   },
   created() {
     this.getWareHousePage();
   },
   methods: {
+    formatEmployment(row, column, cellValue, index) {
+      if (cellValue === "ZZ") {
+        return "中转仓";
+      } else if (cellValue === "CB") {
+        return "储备仓";
+      } else if (cellValue === "JG") {
+        return "加工仓";
+      }
+    },
+    formatEmploymentTwo(row, column, cellValue, index) {
+      if (cellValue === "1") {
+        return "启用";
+      } else {
+        return "停用";
+      }
+    },
     async getWareHousePage() {
       const { data } = await getWareHousePage(this.page);
       this.tableData = data.data.records;
@@ -147,35 +164,36 @@ export default {
       }
       return "";
     },
-    onSubmit() {
+    async onSubmit() {
       // console.log("submit!");
+      const { data } = await getWaresit(this.page);
+      this.tableData = data.data.records;
     },
-    async handleClick(id) {
-      // console.log(id);
+    handleClick(id) {
       this.$router.push({ path: "toolPage", query: { id: id } });
-      // const res = await getWareDetail(id);
-      // console.log(res);
-      // this.$refs.refForm.roleForm = res.data;
-      // console.log(this.$ref.refForm.roleForm);
     },
 
     handleSizeChange(val) {
       // console.log(`每页 ${val} 条`);
     },
-
-    // addWare() {
-    //   this.dialogTableVisible = true;
-    //   // this.$router.back();
-    // },
+    close() {
+      this.page = {
+        warehouseName: "",
+        name: "",
+        status: "",
+        like_code: "",
+        like_name: "",
+        current: 1,
+        size: 10,
+        descs: "createTime",
+      };
+    },
   },
 };
 </script>
 
 <style scoped lang="less">
 .box-card {
-  // display: flex;
-  // justify-content: space-between;
-  // align-items: center;
   .demo-form-inline {
     margin-left: 40px;
   }
@@ -212,6 +230,5 @@ export default {
 .bottom {
   display: flex;
   justify-content: center;
-  // margin: 0 auto;
 }
 </style>

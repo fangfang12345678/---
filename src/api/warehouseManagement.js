@@ -29,3 +29,17 @@ export function getWareDetail(id) {
     url: `api/warehouse/${id}`,
   });
 }
+export function editWare(data) {
+  return request({
+    url: "api/warehouse",
+    method: "put",
+    data,
+  });
+}
+export function getWaresit(params) {
+  return request({
+    url: "api/area/pageDetail",
+    method: "get",
+    params,
+  });
+}

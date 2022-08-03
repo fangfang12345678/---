@@ -38,6 +38,16 @@ const routes = [
         name: "locationManagement",
         component: () => import("@/views/locationManagement"),
       },
+      {
+        path: "locationView",
+        name: "locationView",
+        component: () => import("@/views/locationView"),
+      },
+      {
+        path: "locationTool",
+        name: "locationTool",
+        component: () => import("@/components/locationTool"),
+      },
     ],
   },
   {

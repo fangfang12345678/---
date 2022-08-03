@@ -46,11 +46,31 @@
         </el-table-column>
         <el-table-column prop="name" label="库区名称" width="120">
         </el-table-column>
-        <el-table-column prop="name" label="温度类型" width="300">
+        <el-table-column
+          prop="temperatureType"
+          label="温度类型"
+          :formatter="formatEmployment"
+          width="100"
+        >
         </el-table-column>
-        <el-table-column prop="useType" label="承重类型" width="120">
+        <el-table-column prop="bearingType" label="承重类型" width="120">
         </el-table-column>
-        <el-table-column prop="name" label="用途属性" width="120">
+        <el-table-column prop="useType" label="用途属性" width="120">
+        </el-table-column>
+        <el-table-column
+          prop="status"
+          label="库区状态"
+          :formatter="formatEmploymentTwo"
+          width="120"
+        >
+        </el-table-column>
+        <el-table-column prop="createName" label="负责人" width="120">
+        </el-table-column>
+        <el-table-column prop="phone" label="联系电话" width="120">
+        </el-table-column>
+        <el-table-column prop="includedNum" label="库位数量" width="120">
+        </el-table-column>
+        <el-table-column prop="updateTime" label="更新时间" width="120">
         </el-table-column>
         <el-table-column fixed="right" label="操作" width="130">
           <template slot-scope="scope">
@@ -78,9 +98,7 @@
       </el-pagination>
     </div>
 
-    <!-- <el-dialog :visible="dialogTableVisible" width="90%">
-    
-    </el-dialog> -->
+
   </div>
 </template>
 
@@ -94,28 +112,7 @@ export default {
       total: "",
       // dialogTableVisible: false,
       tableData: [],
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕",
-        },
-        {
-          value: "选项2",
-          label: "双皮奶",
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎",
-        },
-        {
-          value: "选项4",
-          label: "龙须面",
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭",
-        },
-      ],
+      options: [],
       value: "",
       radio: "1",
       currentPage1: 5,
@@ -132,6 +129,22 @@ export default {
     this.getLocationPage();
   },
   methods: {
+    formatEmploymentTwo(row, column, cellValue, index) {
+      if (cellValue === 0) {
+        return "禁用";
+      } else if (cellValue === 1) {
+        return "启用";
+      }
+    },
+    formatEmployment(row, column, cellValue, index) {
+      if (cellValue === "CW") {
+        return "常温";
+      } else if (cellValue === "HW") {
+        return "恒温";
+      } else if (cellValue === "LC") {
+        return "冷藏";
+      }
+    },
     async getLocationPage() {
       const { data } = await getLocationPage(this.page);
       this.tableData = data.data.records;
@@ -147,17 +160,17 @@ export default {
       return "";
     },
     onSubmit() {
-      console.log("submit!");
+      // console.log("submit!");
     },
     handleClick(row) {
-      console.log(row);
+      // console.log(row);
     },
 
     handleSizeChange() {
-      console.log(11);
+      // console.log(11);
     },
     handleCurrentChange() {
-      console.log(345);
+      // console.log(345);
     },
     addWare() {
       // this.dialogTableVisible = true;

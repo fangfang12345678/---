@@ -42,7 +42,9 @@
                   @click="$router.push('locationManagement')"
                   >库位管理</el-menu-item
                 >
-                <el-menu-item index="1-1">库位视图</el-menu-item>
+                <el-menu-item index="1-1" @click="$router.push('locationView')"
+                  >库位视图</el-menu-item
+                >
                 <el-menu-item index="1-2">货品管理</el-menu-item>
                 <el-menu-item index="1-3">货品类型管理</el-menu-item>
               </el-menu-item-group>

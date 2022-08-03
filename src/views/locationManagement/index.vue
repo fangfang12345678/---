@@ -1,24 +1,24 @@
 <template>
   <div id="locationManagement">
     <el-card class="box-card">
-      <el-form :inline="true" :model="formInline" class="demo-form-inline">
+      <el-form :inline="true" class="demo-form-inline">
         <el-form-item>
           <div>库区名称</div>
 
-          <el-input v-model="formInline.user" placeholder="请输入"></el-input>
+          <el-input v-model="page.areaName" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item class="demo-form-inline">
           <div>库位名称</div>
 
-          <el-input v-model="formInline.user" placeholder="请输入"></el-input>
+          <el-input v-model="page.name" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item class="demo-form-inline">
           <div>库位状态</div>
 
-          <el-select v-model="formInline.region" placeholder="请选择">
-            <el-option label="全部" value="shanghai"></el-option>
-            <el-option label="停用" value="beijing"></el-option>
-            <el-option label="启用" value="beijing"></el-option>
+          <el-select v-model="page.region" placeholder="请选择">
+            <el-option label="全部" value=""></el-option>
+            <el-option label="停用" value="0"></el-option>
+            <el-option label="启用" value="1"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -48,29 +48,40 @@
         </el-table-column>
         <el-table-column prop="areaName" label="仓库名称" width="120">
         </el-table-column>
-        <el-table-column prop="code" label="库位编号" width="300">
+        <el-table-column prop="code" label="库位编号" width="120">
         </el-table-column>
         <el-table-column prop="name" label="库位名称" width="120">
         </el-table-column>
-        <el-table-column prop="temperatureType" label="温度类型" width="120">
+        <el-table-column
+          prop="temperatureType"
+          label="温度类型"
+          :formatter="formatEmploymentTwo"
+          width="120"
+        >
         </el-table-column>
-        <el-table-column prop="code" label="承重类型" width="300">
+        <el-table-column prop="code" label="承重类型" width="120">
         </el-table-column>
         <el-table-column prop="name" label="用途属性" width="120">
         </el-table-column>
-        <el-table-column prop="maxWeight" label="承重上限" width="300">
+        <el-table-column
+          prop="useStatus"
+          label="停用状态"
+          :formatter="formatEmployment"
+          width="120"
+        >
+        </el-table-column>
+        <el-table-column prop="maxWeight" label="承重上限" width="120">
         </el-table-column>
         <el-table-column prop="updateTime" label="更新时间" width="120">
         </el-table-column>
-        <el-table-column prop="useStatus" label="停用状态" width="120">
-        </el-table-column>
+
         <el-table-column fixed="right" label="操作" width="130">
           <template slot-scope="scope">
             <el-button @click="handleClick(scope.row)" type="text" size="small"
               >编辑</el-button
             >
             <el-button @click="handleClick(scope.row)" type="text" size="small"
-              >启用</el-button
+              >停用</el-button
             >
             <el-button type="text" size="small">删除</el-button>
           </template>
@@ -82,11 +93,11 @@
       <el-pagination
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        :current-page="currentPage4"
+        :current-page="page.current"
         :page-sizes="[10, 20, 30, 40]"
         :page-size="page.size"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="60"
+        :total="+total"
       >
       </el-pagination>
     </div>
@@ -94,64 +105,56 @@
 </template>
 
 <script>
-import { getLocationPageTwo } from "@/api/locationManagement";
+import EmployeeEnum from "@/api/constant/common";
+
+import {
+  getLocationPageTwo,
+  matcheLocationList,
+} from "@/api/locationManagement";
 export default {
   name: "locationManagement",
   data() {
     return {
-      currentPage1: 5,
-      currentPage2: 5,
-      currentPage3: 5,
-      currentPage4: 4,
       page: {
+        region: "",
         areaName: "",
         name: "",
         current: 1,
         size: 10,
       },
-      total: 10,
+      total: 0,
       tableData: [],
 
-      options: [
-        {
-          value: "选项1",
-          label: "黄金糕",
-        },
-        {
-          value: "选项2",
-          label: "双皮奶",
-        },
-        {
-          value: "选项3",
-          label: "蚵仔煎",
-        },
-        {
-          value: "选项4",
-          label: "龙须面",
-        },
-        {
-          value: "选项5",
-          label: "北京烤鸭",
-        },
-      ],
+      options: [],
       value: "",
       radio: "1",
-
-      formInline: {
-        user: "",
-        region: "",
-      },
     };
   },
   created() {
     this.getLocationPageTwo();
   },
   methods: {
+    formatEmployment(row, column, cellValue, index) {
+      // console.log(row, column, cellValue, index);
+      // 要去找 1所对应的值
+      const obj = EmployeeEnum.enableState.find(
+        (item) => item.id === cellValue
+      );
+      return obj === 1 ? "启用" : "停用";
+    },
+    formatEmploymentTwo(row, column, cellValue, index) {
+      if (cellValue === "CW") {
+        return "常温";
+      } else if (cellValue === "HW") {
+        return "恒温";
+      } else if (cellValue === "LC") {
+        return "冷藏";
+      }
+    },
     async getLocationPageTwo() {
       const { data } = await getLocationPageTwo(this.page);
       this.tableData = data.data.records;
       this.total = data.data.total;
-      console.log(this.total);
     },
     tableRowClassName({ row, rowIndex }) {
       if (rowIndex === 1) {
@@ -161,22 +164,28 @@ export default {
       }
       return "";
     },
-    onSubmit() {
+    async onSubmit() {
       console.log("submit!");
+      const res = await matcheLocationList(this.page);
+      this.tableData = res.data.data.records;
+      this.total = res.data.data.total;
+      // console.log(this.total);
     },
-    handleClick(row) {
-      console.log(row);
-    },
+    handleClick(row) {},
 
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+      // console.log(`每页 ${val} 条`);
+      this.page.size = val;
+      this.getLocationPageTwo();
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+      // console.log(`当前页: ${val}`);
+      this.page.current = val;
+      this.getLocationPageTwo();
     },
     addWare() {
-      this.dialogTableVisible = true;
-      this.$router.push("toolPage");
+      // this.dialogTableVisible = true;
+      this.$router.push("locationTool");
     },
   },
 };

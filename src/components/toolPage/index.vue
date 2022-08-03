@@ -42,7 +42,7 @@
         </el-row>
         <el-row>
           <el-col :span="16">
-            <el-form-item label="详细地址" style="width: 520px">
+            <el-form-item label="详细地址" style="width: 1000px">
               <el-input
                 type="text"
                 v-model="roleForm.address"
@@ -97,15 +97,14 @@
 </template>
 
 <script>
-import { getWareDetail } from "@/api/warehouseManagement";
+import { getWareDetail, editWare } from "@/api/warehouseManagement";
 
 import { regionData, CodeToText } from "element-china-area-data";
 import { getWareHouseDatial, addWare } from "@/api/warehouseManagement";
 export default {
   data() {
     return {
-      id: "",
-      // form: {},
+      form: {},
       options: regionData, //省市区数据
       selectedOptions: [], // 选中的地区
       roleForm: {
@@ -148,7 +147,8 @@ export default {
     };
   },
   created() {
-    this.id = this.$route.query.id;
+    this.getFormInfo();
+    // console.log(this.roleForm.id);
     // 初始化省市区
     this.selectedOptions = [
       this.roleForm.provinceCode,
@@ -159,40 +159,43 @@ export default {
     this.getWareHouseDatial();
   },
   methods: {
+    async getFormInfo() {
+      const res = await getWareDetail(this.$route.query.id);
+      this.roleForm = res.data.data;
+    },
     addressChange(arr) {
-      var _this = this;
-      _this.form.provinceCode = arr[0];
-      _this.form.cityCode = arr[1];
-      _this.form.areaCode = arr[2];
+      this.form.provinceCode = CodeToText[arr[0]];
+      this.form.cityCode = CodeToText[arr[1]];
+      this.form.areaCode = CodeToText[arr[2]];
     },
     async getWareHouseDatial() {
       const res = await getWareHouseDatial();
       this.roleForm.code = res.data.data;
     },
+
     async btnOk() {
-      console.log(this.id);
-      if (this.id) {
-        console.log(11111111);
-        const res = await getWareDetail(this.id);
-        this.roleForm = res.data;
+      if (this.roleForm.id) {
+        await editWare(this.roleForm);
+        this.$message.success("编辑成功");
       } else {
         await addWare({
           address: this.roleForm.address,
           code: this.roleForm.code,
-          location: `${this.roleForm.location[0]}/${this.roleForm.location[1]}/${this.roleForm.location[2]}`,
+          location: `${this.form.provinceCode}/${this.form.cityCode}/${this.form.areaCode}`,
           phone: this.roleForm.phone,
-          area: this.roleForm.location[2],
-          city: this.roleForm.location[1],
+          area: this.form.areaCode,
+          city: this.form.cityCode,
           name: this.roleForm.name,
           personName: this.roleForm.personName,
-          province: this.roleForm.location[0],
+          province: this.form.provinceCode,
           status: "1",
           surface: this.roleForm.status === "启用" ? "1" : "1",
           type: this.roleForm.type,
         });
+        this.$message.success("添加成功");
       }
+
       this.id = "";
-      this.$message.success("请求成功");
       this.$router.push("warehouseManagement");
     },
   },
